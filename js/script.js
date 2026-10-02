@@ -5,34 +5,104 @@ const input = document.querySelector(".input-area input");
 const sendButton = document.querySelector(".input-area button");
 const suggestionButtons = document.querySelectorAll(".suggestions button");
 
+
+/* =========================================================
+   SEGURANÇA
+   ========================================================= */
+
+function escapeHtml(text) {
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+
+/* =========================================================
+   FORMATAÇÃO DAS RESPOSTAS
+   ========================================================= */
+
+function formatMessage(text) {
+    let formattedText = escapeHtml(text);
+
+    // Negrito: **texto**
+    formattedText = formattedText.replace(
+        /\*\*(.*?)\*\*/g,
+        "<strong>$1</strong>"
+    );
+
+    // Itálico: *texto*
+    formattedText = formattedText.replace(
+        /(^|[^*])\*([^*]+)\*(?!\*)/g,
+        "$1<em>$2</em>"
+    );
+
+    // Código simples: `código`
+    formattedText = formattedText.replace(
+        /`([^`]+)`/g,
+        "<code>$1</code>"
+    );
+
+    // Quebras de linha
+    formattedText = formattedText.replace(/\n/g, "<br>");
+
+    return formattedText;
+}
+
+
+/* =========================================================
+   ADICIONAR MENSAGEM AO CHAT
+   ========================================================= */
+
 function addMessage(text, type) {
     const message = document.createElement("div");
     message.classList.add("message");
 
+    const messageContent = document.createElement("div");
+    messageContent.classList.add("message-content");
+
+    const messageName = document.createElement("span");
+    messageName.classList.add("message-name");
+
+    const messageText = document.createElement("p");
+
     if (type === "user") {
         message.classList.add("user-message");
 
-        message.innerHTML = `
-            <div class="message-content">
-                <span class="message-name">Você</span>
-                <p>${text}</p>
-            </div>
-        `;
+        messageName.textContent = "Você";
+        messageText.textContent = text;
+
+        messageContent.appendChild(messageName);
+        messageContent.appendChild(messageText);
+        message.appendChild(messageContent);
+
     } else {
         message.classList.add("assistant-message");
 
-        message.innerHTML = `
-            <div class="message-avatar">🤖</div>
-            <div class="message-content">
-                <span class="message-name">Assistente</span>
-                <p>${text}</p>
-            </div>
-        `;
+        const avatar = document.createElement("div");
+        avatar.classList.add("message-avatar");
+        avatar.textContent = "🤖";
+
+        messageName.textContent = "Assistente";
+
+        // A resposta da IA passa pela função de formatação.
+        messageText.innerHTML = formatMessage(text);
+
+        messageContent.appendChild(messageName);
+        messageContent.appendChild(messageText);
+
+        message.appendChild(avatar);
+        message.appendChild(messageContent);
     }
 
     messagesContainer.appendChild(message);
+
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
+
+
+/* =========================================================
+   ENVIAR MENSAGEM
+   ========================================================= */
 
 async function sendMessage() {
     const text = input.value.trim();
@@ -41,17 +111,23 @@ async function sendMessage() {
         return;
     }
 
+    // Mostra a pergunta do usuário.
     addMessage(text, "user");
 
+    // Limpa o campo.
     input.value = "";
+
+    // Desabilita o botão enquanto a IA responde.
     sendButton.disabled = true;
 
     try {
         const response = await fetch(API_URL, {
             method: "POST",
+
             headers: {
                 "Content-Type": "application/json"
             },
+
             body: JSON.stringify({
                 message: text
             })
@@ -59,10 +135,21 @@ async function sendMessage() {
 
         const data = await response.json();
 
+        // Verifica se o backend retornou algum erro.
         if (!response.ok) {
-            throw new Error(data.error || "Erro ao processar a mensagem.");
+            throw new Error(
+                data.error || "Erro ao processar a mensagem."
+            );
         }
 
+        // Verifica se a resposta da IA realmente existe.
+        if (!data.response) {
+            throw new Error(
+                "O servidor não retornou uma resposta válida."
+            );
+        }
+
+        // Mostra a resposta da IA.
         addMessage(data.response, "assistant");
 
     } catch (error) {
@@ -72,32 +159,60 @@ async function sendMessage() {
             "Não foi possível conectar ao servidor. Tente novamente em alguns segundos.",
             "assistant"
         );
+
     } finally {
+        // Reativa o botão.
         sendButton.disabled = false;
+
+        // Devolve o foco para o campo de mensagem.
         input.focus();
     }
 }
 
+
+/* =========================================================
+   BOTÃO ENVIAR
+   ========================================================= */
+
 sendButton.addEventListener("click", sendMessage);
+
+
+/* =========================================================
+   ENTER PARA ENVIAR
+   ========================================================= */
 
 input.addEventListener("keydown", function (event) {
     if (event.key === "Enter") {
+        event.preventDefault();
         sendMessage();
     }
 });
+
+
+/* =========================================================
+   BOTÕES DE SUGESTÃO
+   ========================================================= */
 
 suggestionButtons.forEach((button) => {
     button.addEventListener("click", function () {
         const text = button.textContent.trim();
 
         const prompts = {
-            "🧠 Explique um assunto": "Explique um assunto de forma simples e fácil de entender.",
-            "📝 Crie exercícios": "Crie exercícios para eu praticar meus estudos.",
-            "📖 Faça um resumo": "Faça um resumo de um assunto que estou estudando.",
-            "💡 Tire uma dúvida": "Tenho uma dúvida sobre um assunto e gostaria de ajuda."
+            "🧠 Explique um assunto":
+                "Explique um assunto de forma simples e fácil de entender.",
+
+            "📝 Crie exercícios":
+                "Crie exercícios para eu praticar meus estudos.",
+
+            "📖 Faça um resumo":
+                "Faça um resumo de um assunto que estou estudando.",
+
+            "💡 Tire uma dúvida":
+                "Tenho uma dúvida sobre um assunto e gostaria de ajuda."
         };
 
         input.value = prompts[text] || "";
+
         input.focus();
     });
 });
