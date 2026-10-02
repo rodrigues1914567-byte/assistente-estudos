@@ -35,19 +35,19 @@ function escapeHtml(text) {
 function formatMessage(text) {
     let formattedText = escapeHtml(text);
 
-    // Negrito: **texto**
+    // Negrito
     formattedText = formattedText.replace(
         /\*\*(.*?)\*\*/g,
         "<strong>$1</strong>"
     );
 
-    // Código: `código`
+    // Código
     formattedText = formattedText.replace(
         /`([^`]+)`/g,
         "<code>$1</code>"
     );
 
-    // Títulos simples
+    // Títulos
     formattedText = formattedText.replace(
         /^### (.*?)$/gm,
         "<h4>$1</h4>"
@@ -128,6 +128,41 @@ function addMessage(text, type) {
 
 
 /* =========================================================
+   INDICADOR DE CARREGAMENTO
+   ========================================================= */
+
+function showLoading() {
+    const loadingMessage = document.createElement("div");
+
+    loadingMessage.classList.add(
+        "message",
+        "assistant-message",
+        "loading-message"
+    );
+
+    loadingMessage.innerHTML = `
+        <div class="message-avatar">🤖</div>
+
+        <div class="message-content">
+            <span class="message-name">Assistente</span>
+
+            <p class="loading-text">
+                <span></span>
+                <span></span>
+                <span></span>
+            </p>
+        </div>
+    `;
+
+    messagesContainer.appendChild(loadingMessage);
+
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+    return loadingMessage;
+}
+
+
+/* =========================================================
    ENVIAR MENSAGEM
    ========================================================= */
 
@@ -138,19 +173,13 @@ async function sendMessage() {
         return;
     }
 
-    /* ---------------------------------------------
-       MOSTRA A MENSAGEM DO USUÁRIO
-       --------------------------------------------- */
-
     addMessage(text, "user");
 
     input.value = "";
     sendButton.disabled = true;
 
-
-    /* ---------------------------------------------
-       ENVIA A MENSAGEM E O HISTÓRICO PARA O BACKEND
-       --------------------------------------------- */
+    // Mostra o indicador enquanto a IA responde.
+    const loadingMessage = showLoading();
 
     try {
         const response = await fetch(API_URL, {
@@ -166,13 +195,7 @@ async function sendMessage() {
             })
         });
 
-
         const data = await response.json();
-
-
-        /* ---------------------------------------------
-           VERIFICAÇÃO DE ERRO
-           --------------------------------------------- */
 
         if (!response.ok) {
             throw new Error(
@@ -180,35 +203,25 @@ async function sendMessage() {
             );
         }
 
-
         if (!data.response) {
             throw new Error(
                 "O servidor não retornou uma resposta válida."
             );
         }
 
+        // Remove o indicador de carregamento.
+        loadingMessage.remove();
 
-        /* ---------------------------------------------
-           SALVA A PERGUNTA NO HISTÓRICO
-           --------------------------------------------- */
-
+        // Salva a pergunta no histórico.
         conversationHistory.push({
             role: "user",
             content: text
         });
 
-
-        /* ---------------------------------------------
-           MOSTRA A RESPOSTA DA IA
-           --------------------------------------------- */
-
+        // Mostra a resposta.
         addMessage(data.response, "assistant");
 
-
-        /* ---------------------------------------------
-           SALVA A RESPOSTA DA IA NO HISTÓRICO
-           --------------------------------------------- */
-
+        // Salva a resposta da IA no histórico.
         conversationHistory.push({
             role: "assistant",
             content: data.response
@@ -216,6 +229,9 @@ async function sendMessage() {
 
     } catch (error) {
         console.error("Erro:", error);
+
+        // Remove o indicador de carregamento.
+        loadingMessage.remove();
 
         addMessage(
             "Não foi possível conectar ao servidor. Tente novamente em alguns segundos.",
