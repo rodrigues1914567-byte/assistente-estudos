@@ -1,9 +1,20 @@
 const API_URL = "https://assistente-estudos-fsq1.onrender.com/api/chat/";
 
+/* =========================================================
+   ELEMENTOS DA INTERFACE
+   ========================================================= */
+
 const messagesContainer = document.querySelector(".messages");
 const input = document.querySelector(".input-area input");
 const sendButton = document.querySelector(".input-area button");
 const suggestionButtons = document.querySelectorAll(".suggestions button");
+
+
+/* =========================================================
+   HISTÓRICO DA CONVERSA
+   ========================================================= */
+
+const conversationHistory = [];
 
 
 /* =========================================================
@@ -18,7 +29,7 @@ function escapeHtml(text) {
 
 
 /* =========================================================
-   FORMATAÇÃO DAS RESPOSTAS DA IA
+   FORMATAÇÃO DAS RESPOSTAS
    ========================================================= */
 
 function formatMessage(text) {
@@ -36,7 +47,7 @@ function formatMessage(text) {
         "<code>$1</code>"
     );
 
-    // Títulos simples: # Título
+    // Títulos simples
     formattedText = formattedText.replace(
         /^### (.*?)$/gm,
         "<h4>$1</h4>"
@@ -127,10 +138,19 @@ async function sendMessage() {
         return;
     }
 
+    /* ---------------------------------------------
+       MOSTRA A MENSAGEM DO USUÁRIO
+       --------------------------------------------- */
+
     addMessage(text, "user");
 
     input.value = "";
     sendButton.disabled = true;
+
+
+    /* ---------------------------------------------
+       ENVIA A MENSAGEM E O HISTÓRICO PARA O BACKEND
+       --------------------------------------------- */
 
     try {
         const response = await fetch(API_URL, {
@@ -141,11 +161,18 @@ async function sendMessage() {
             },
 
             body: JSON.stringify({
-                message: text
+                message: text,
+                messages: conversationHistory
             })
         });
 
+
         const data = await response.json();
+
+
+        /* ---------------------------------------------
+           VERIFICAÇÃO DE ERRO
+           --------------------------------------------- */
 
         if (!response.ok) {
             throw new Error(
@@ -153,13 +180,39 @@ async function sendMessage() {
             );
         }
 
+
         if (!data.response) {
             throw new Error(
                 "O servidor não retornou uma resposta válida."
             );
         }
 
+
+        /* ---------------------------------------------
+           SALVA A PERGUNTA NO HISTÓRICO
+           --------------------------------------------- */
+
+        conversationHistory.push({
+            role: "user",
+            content: text
+        });
+
+
+        /* ---------------------------------------------
+           MOSTRA A RESPOSTA DA IA
+           --------------------------------------------- */
+
         addMessage(data.response, "assistant");
+
+
+        /* ---------------------------------------------
+           SALVA A RESPOSTA DA IA NO HISTÓRICO
+           --------------------------------------------- */
+
+        conversationHistory.push({
+            role: "assistant",
+            content: data.response
+        });
 
     } catch (error) {
         console.error("Erro:", error);
