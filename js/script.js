@@ -1,3 +1,5 @@
+const API_URL = "https://assistente-estudos-fsq1.onrender.com/api/chat/";
+
 const messagesContainer = document.querySelector(".messages");
 const input = document.querySelector(".input-area input");
 const sendButton = document.querySelector(".input-area button");
@@ -32,7 +34,7 @@ function addMessage(text, type) {
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
 
-function sendMessage() {
+async function sendMessage() {
     const text = input.value.trim();
 
     if (text === "") {
@@ -42,13 +44,38 @@ function sendMessage() {
     addMessage(text, "user");
 
     input.value = "";
+    sendButton.disabled = true;
 
-    setTimeout(() => {
+    try {
+        const response = await fetch(API_URL, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: text
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Erro ao processar a mensagem.");
+        }
+
+        addMessage(data.response, "assistant");
+
+    } catch (error) {
+        console.error("Erro:", error);
+
         addMessage(
-            "Recebi sua pergunta! A conexão com a Inteligência Artificial será adicionada na próxima etapa.",
+            "Não foi possível conectar ao servidor. Tente novamente em alguns segundos.",
             "assistant"
         );
-    }, 600);
+    } finally {
+        sendButton.disabled = false;
+        input.focus();
+    }
 }
 
 sendButton.addEventListener("click", sendMessage);
