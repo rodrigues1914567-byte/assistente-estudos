@@ -18,7 +18,7 @@ function escapeHtml(text) {
 
 
 /* =========================================================
-   FORMATAÇÃO DAS RESPOSTAS
+   FORMATAÇÃO DAS RESPOSTAS DA IA
    ========================================================= */
 
 function formatMessage(text) {
@@ -30,16 +30,32 @@ function formatMessage(text) {
         "<strong>$1</strong>"
     );
 
-    // Itálico: *texto*
-    formattedText = formattedText.replace(
-        /(^|[^*])\*([^*]+)\*(?!\*)/g,
-        "$1<em>$2</em>"
-    );
-
-    // Código simples: `código`
+    // Código: `código`
     formattedText = formattedText.replace(
         /`([^`]+)`/g,
         "<code>$1</code>"
+    );
+
+    // Títulos simples: # Título
+    formattedText = formattedText.replace(
+        /^### (.*?)$/gm,
+        "<h4>$1</h4>"
+    );
+
+    formattedText = formattedText.replace(
+        /^## (.*?)$/gm,
+        "<h3>$1</h3>"
+    );
+
+    formattedText = formattedText.replace(
+        /^# (.*?)$/gm,
+        "<h2>$1</h2>"
+    );
+
+    // Listas com hífen
+    formattedText = formattedText.replace(
+        /^- (.*?)$/gm,
+        "• $1"
     );
 
     // Quebras de linha
@@ -73,6 +89,7 @@ function addMessage(text, type) {
 
         messageContent.appendChild(messageName);
         messageContent.appendChild(messageText);
+
         message.appendChild(messageContent);
 
     } else {
@@ -84,7 +101,6 @@ function addMessage(text, type) {
 
         messageName.textContent = "Assistente";
 
-        // A resposta da IA passa pela função de formatação.
         messageText.innerHTML = formatMessage(text);
 
         messageContent.appendChild(messageName);
@@ -111,13 +127,9 @@ async function sendMessage() {
         return;
     }
 
-    // Mostra a pergunta do usuário.
     addMessage(text, "user");
 
-    // Limpa o campo.
     input.value = "";
-
-    // Desabilita o botão enquanto a IA responde.
     sendButton.disabled = true;
 
     try {
@@ -135,21 +147,18 @@ async function sendMessage() {
 
         const data = await response.json();
 
-        // Verifica se o backend retornou algum erro.
         if (!response.ok) {
             throw new Error(
                 data.error || "Erro ao processar a mensagem."
             );
         }
 
-        // Verifica se a resposta da IA realmente existe.
         if (!data.response) {
             throw new Error(
                 "O servidor não retornou uma resposta válida."
             );
         }
 
-        // Mostra a resposta da IA.
         addMessage(data.response, "assistant");
 
     } catch (error) {
@@ -161,10 +170,7 @@ async function sendMessage() {
         );
 
     } finally {
-        // Reativa o botão.
         sendButton.disabled = false;
-
-        // Devolve o foco para o campo de mensagem.
         input.focus();
     }
 }
@@ -212,7 +218,6 @@ suggestionButtons.forEach((button) => {
         };
 
         input.value = prompts[text] || "";
-
         input.focus();
     });
 });
