@@ -438,6 +438,59 @@ body {
 
 
 /* =========================================================
+   INDICADOR DE CARREGAMENTO
+   ========================================================= */
+
+.loading-text {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    min-height: 20px;
+}
+
+
+.loading-text span {
+    width: 6px;
+    height: 6px;
+
+    flex-shrink: 0;
+
+    border-radius: 50%;
+
+    background: var(--primary-light);
+
+    animation: assistantTyping 1.2s infinite ease-in-out;
+}
+
+
+.loading-text span:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+
+.loading-text span:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+
+@keyframes assistantTyping {
+    0%,
+    60%,
+    100% {
+        opacity: 0.35;
+        transform: translateY(0);
+    }
+
+    30% {
+        opacity: 1;
+        transform: translateY(-3px);
+    }
+}
+
+
+/* =========================================================
    SUGGESTIONS
    ========================================================= */
 
@@ -449,7 +502,6 @@ body {
     gap: 10px;
 
     margin:
-
         30px 0 0 46px;
 }
 
@@ -563,7 +615,8 @@ body {
 
     transition:
         background 0.2s ease,
-        transform 0.2s ease;
+        transform 0.2s ease,
+        opacity 0.2s ease;
 }
 
 
@@ -573,6 +626,71 @@ body {
     transform: translateY(-1px);
 }
 
+
+.input-area button:disabled {
+    opacity: 0.55;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* =========================================================
+   FORMATAÇÃO DAS RESPOSTAS
+   ========================================================= */
+
+.message-content h2,
+.message-content h3,
+.message-content h4 {
+    margin-top: 14px;
+    margin-bottom: 8px;
+
+    color: var(--text);
+
+    line-height: 1.35;
+}
+
+
+.message-content h2 {
+    font-size: 20px;
+}
+
+
+.message-content h3 {
+    font-size: 18px;
+}
+
+
+.message-content h4 {
+    font-size: 16px;
+}
+
+
+.message-content code {
+    padding: 2px 6px;
+
+    background: rgba(96, 165, 250, 0.1);
+
+    border: 1px solid rgba(96, 165, 250, 0.15);
+
+    border-radius: 5px;
+
+    color: var(--primary-light);
+
+    font-family:
+        Consolas,
+        Monaco,
+        "Courier New",
+        monospace;
+
+    font-size: 0.9em;
+}
+
+
+/* =========================================================
+   DISCLAIMER
+   ========================================================= */
 
 .disclaimer {
     padding: 13px 20px 18px;
@@ -615,6 +733,37 @@ body {
     color: var(--text-muted);
 
     font-size: 11px;
+}
+
+
+/* =========================================================
+   ACESSIBILIDADE E FOCO
+   ========================================================= */
+
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid var(--primary-light);
+
+    outline-offset: 2px;
+}
+
+
+/* =========================================================
+   REDUÇÃO DE MOVIMENTO
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+    html {
+        scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 }
 
 
@@ -781,5 +930,10 @@ body {
         flex: 1 1 calc(50% - 8px);
 
         min-height: 42px;
+    }
+
+
+    .input-area input {
+        font-size: 13px;
     }
 }
