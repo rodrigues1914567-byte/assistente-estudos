@@ -189,7 +189,13 @@ DEFAULT_AUTO_FIELD = (
 FRONTEND_ORIGIN = os.environ.get(
     "FRONTEND_ORIGIN",
     "https://rodrigues1914567-byte.github.io",
-).rstrip("/")
+).strip().rstrip("/")
+
+
+if not FRONTEND_ORIGIN:
+    raise RuntimeError(
+        "FRONTEND_ORIGIN não configurado."
+    )
 
 
 # =========================================================
@@ -276,11 +282,9 @@ X_FRAME_OPTIONS = "DENY"
 
 
 # =========================================================
-# LIMITES DE UPLOAD / REQUEST
+# LIMITES DE REQUEST
 # =========================================================
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 250_000
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 20
-
-DATA_UPLOAD_MAX_NUMBER_FILES = 0
