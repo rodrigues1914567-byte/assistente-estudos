@@ -11,12 +11,20 @@
 
     <meta
         name="description"
-        content="Assistente de estudos com Inteligência Artificial para ajudar na compreensão de assuntos, exercícios, resumos e dúvidas."
+        content="Assistente de Estudos com Inteligência Artificial para ajudar na compreensão de assuntos, exercícios, resumos e dúvidas."
     >
 
-    <meta name="theme-color" content="#080b12">
+    <meta
+        name="theme-color"
+        content="#080b12"
+    >
 
-    <title>Assistente de Estudos</title>
+    <meta
+        name="robots"
+        content="index, follow"
+    >
+
+    <title>Assistente de Estudos | Inteligência Artificial</title>
 
     <link
         rel="stylesheet"
@@ -24,7 +32,12 @@
     >
 </head>
 
+
 <body>
+
+    <!-- =====================================================
+         CABEÇALHO
+         ===================================================== -->
 
     <header class="topbar">
 
@@ -38,11 +51,15 @@
             </span>
 
             <div>
-                <strong>Assistente de Estudos</strong>
+
+                <strong>
+                    Assistente de Estudos
+                </strong>
 
                 <span>
                     Aprenda com mais clareza.
                 </span>
+
             </div>
 
         </div>
@@ -60,7 +77,16 @@
     </header>
 
 
+    <!-- =====================================================
+         CONTEÚDO PRINCIPAL
+         ===================================================== -->
+
     <main class="main">
+
+
+        <!-- =================================================
+             APRESENTAÇÃO
+             ================================================= -->
 
         <section
             class="welcome"
@@ -71,10 +97,17 @@
                 ASSISTENTE DE ESTUDOS
             </span>
 
+
             <h1 id="welcome-title">
+
                 O que você quer
-                <span>aprender hoje?</span>
+
+                <span>
+                    aprender hoje?
+                </span>
+
             </h1>
+
 
             <p>
                 Tire dúvidas, peça explicações e use a
@@ -84,10 +117,19 @@
         </section>
 
 
+        <!-- =================================================
+             CHAT
+             ================================================= -->
+
         <section
             class="chat"
             aria-label="Chat do Assistente de Estudos"
         >
+
+
+            <!-- =============================================
+                 CABEÇALHO DO CHAT
+                 ============================================= -->
 
             <div class="chat-header">
 
@@ -98,27 +140,50 @@
                     🤖
                 </div>
 
+
                 <div>
-                    <strong>Assistente</strong>
+
+                    <strong>
+                        Assistente
+                    </strong>
 
                     <span>
                         Pronto para ajudar
                     </span>
+
                 </div>
 
-                <div class="status">
-                    <span aria-hidden="true"></span>
+
+                <div
+                    class="status"
+                    aria-label="Assistente online"
+                >
+
+                    <span
+                        aria-hidden="true"
+                    ></span>
+
                     Online
+
                 </div>
 
             </div>
 
 
+            <!-- =============================================
+                 ÁREA DE MENSAGENS
+                 ============================================= -->
+
             <div
                 class="messages"
                 aria-live="polite"
-                aria-relevant="additions"
+                aria-relevant="additions text"
             >
+
+
+                <!-- =========================================
+                     MENSAGEM INICIAL
+                     ========================================= -->
 
                 <div class="message assistant-message">
 
@@ -129,11 +194,13 @@
                         🤖
                     </div>
 
+
                     <div class="message-content">
 
                         <span class="message-name">
                             Assistente
                         </span>
+
 
                         <p>
                             Olá! 👋
@@ -148,21 +215,39 @@
                 </div>
 
 
-                <div class="suggestions">
+                <!-- =========================================
+                     SUGESTÕES
+                     ========================================= -->
 
-                    <button type="button">
+                <div
+                    class="suggestions"
+                    aria-label="Sugestões de perguntas"
+                >
+
+                    <button
+                        type="button"
+                    >
                         🧠 Explique um assunto
                     </button>
 
-                    <button type="button">
+
+                    <button
+                        type="button"
+                    >
                         📝 Crie exercícios
                     </button>
 
-                    <button type="button">
+
+                    <button
+                        type="button"
+                    >
                         📖 Faça um resumo
                     </button>
 
-                    <button type="button">
+
+                    <button
+                        type="button"
+                    >
                         💡 Tire uma dúvida
                     </button>
 
@@ -171,29 +256,49 @@
             </div>
 
 
+            <!-- =============================================
+                 CAMPO DE ENVIO
+                 ============================================= -->
+
             <form
                 class="input-area"
                 id="chat-form"
+                novalidate
             >
+
+                <label
+                    for="chat-input"
+                    class="sr-only"
+                >
+                    Digite sua dúvida
+                </label>
+
 
                 <input
                     type="text"
                     id="chat-input"
+                    name="message"
                     placeholder="Digite sua dúvida..."
                     autocomplete="off"
                     maxlength="4000"
                     aria-label="Digite sua dúvida"
                 >
 
+
                 <button
                     type="submit"
                     aria-label="Enviar pergunta"
+                    title="Enviar pergunta"
                 >
                     ➤
                 </button>
 
             </form>
 
+
+            <!-- =============================================
+                 AVISO
+                 ============================================= -->
 
             <p class="disclaimer">
                 O assistente é uma ferramenta de apoio aos estudos.
@@ -204,6 +309,10 @@
 
     </main>
 
+
+    <!-- =====================================================
+         RODAPÉ
+         ===================================================== -->
 
     <footer class="footer">
 
@@ -218,7 +327,14 @@
     </footer>
 
 
-    <script src="js/script.js"></script>
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
+    <script
+        src="js/script.js"
+        defer
+    ></script>
 
 </body>
 
