@@ -78,9 +78,11 @@ let isSending = false;
  */
 
 function escapeHtml(text) {
-    const div = document.createElement("div");
+    const div =
+        document.createElement("div");
 
-    div.textContent = String(text);
+    div.textContent =
+        String(text);
 
     return div.innerHTML;
 }
@@ -91,74 +93,141 @@ function escapeHtml(text) {
    ========================================================= */
 
 function formatMessage(text) {
-    let formattedText = escapeHtml(text);
+    let formattedText =
+        escapeHtml(text);
 
     /*
-     * Código em bloco
+     * Protege blocos de código antes de aplicar
+     * outras regras de Markdown.
      *
-     * Deve ser tratado antes do código inline para evitar
-     * conflitos entre os dois formatos.
+     * Isso impede que títulos, negrito ou outras
+     * substituições sejam aplicados dentro do código.
      */
 
-    formattedText = formattedText.replace(
-        /```([\s\S]*?)```/g,
-        '<pre><code>$1</code></pre>'
-    );
+    const codeBlocks = [];
+
+    formattedText =
+        formattedText.replace(
+            /```([\s\S]*?)```/g,
+            function (_, code) {
+                const index =
+                    codeBlocks.length;
+
+                codeBlocks.push(
+                    `<pre><code>${code}</code></pre>`
+                );
+
+                return `___CODE_BLOCK_${index}___`;
+            }
+        );
 
     /*
-     * Código inline
+     * Protege código inline.
      */
 
-    formattedText = formattedText.replace(
-        /`([^`\n]+)`/g,
-        "<code>$1</code>"
-    );
+    const inlineCode = [];
+
+    formattedText =
+        formattedText.replace(
+            /`([^`\n]+)`/g,
+            function (_, code) {
+                const index =
+                    inlineCode.length;
+
+                inlineCode.push(
+                    `<code>${code}</code>`
+                );
+
+                return `___INLINE_CODE_${index}___`;
+            }
+        );
 
     /*
      * Negrito
      */
 
-    formattedText = formattedText.replace(
-        /\*\*(.*?)\*\*/g,
-        "<strong>$1</strong>"
-    );
+    formattedText =
+        formattedText.replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>"
+        );
 
     /*
      * Títulos Markdown
      */
 
-    formattedText = formattedText.replace(
-        /^### (.*?)$/gm,
-        "<h4>$1</h4>"
-    );
+    formattedText =
+        formattedText.replace(
+            /^### (.*?)$/gm,
+            "<h4>$1</h4>"
+        );
 
-    formattedText = formattedText.replace(
-        /^## (.*?)$/gm,
-        "<h3>$1</h3>"
-    );
+    formattedText =
+        formattedText.replace(
+            /^## (.*?)$/gm,
+            "<h3>$1</h3>"
+        );
 
-    formattedText = formattedText.replace(
-        /^# (.*?)$/gm,
-        "<h2>$1</h2>"
-    );
+    formattedText =
+        formattedText.replace(
+            /^# (.*?)$/gm,
+            "<h2>$1</h2>"
+        );
 
     /*
      * Listas com hífen
      */
 
-    formattedText = formattedText.replace(
-        /^- (.*?)$/gm,
-        "• $1"
-    );
+    formattedText =
+        formattedText.replace(
+            /^- (.*?)$/gm,
+            "• $1"
+        );
 
     /*
-     * Quebras de linha
+     * Quebras de linha.
+     *
+     * Os blocos de código estão protegidos neste momento,
+     * portanto suas quebras internas permanecem intactas.
      */
 
-    formattedText = formattedText.replace(
-        /\n/g,
-        "<br>"
-    );
+    formattedText =
+        formattedText.replace(
+            /\n/g,
+            "<br>"
+        );
+
+    /*
+     * Restaura código inline.
+     */
+
+    formattedText =
+        formattedText.replace(
+            /___INLINE_CODE_(\d+)___/g,
+            function (_, index) {
+                return (
+                    inlineCode[
+                        Number(index)
+                    ] || ""
+                );
+            }
+        );
+
+    /*
+     * Restaura blocos de código.
+     */
+
+    formattedText =
+        formattedText.replace(
+            /___CODE_BLOCK_(\d+)___/g,
+            function (_, index) {
+                return (
+                    codeBlocks[
+                        Number(index)
+                    ] || ""
+                );
+            }
+        );
 
     return formattedText;
 }
@@ -176,7 +245,9 @@ function addMessage(text, type) {
     const message =
         document.createElement("div");
 
-    message.classList.add("message");
+    message.classList.add(
+        "message"
+    );
 
     const messageContent =
         document.createElement("div");
@@ -349,7 +420,8 @@ function showLoading() {
    ========================================================= */
 
 function setSendingState(sending) {
-    isSending = sending;
+    isSending =
+        sending;
 
     if (sendButton) {
         sendButton.disabled =
@@ -639,7 +711,7 @@ async function sendMessage() {
         try {
             data =
                 await response.json();
-        } catch (jsonError) {
+        } catch {
             throw new Error(
                 "O servidor retornou uma resposta inválida."
             );
@@ -753,10 +825,19 @@ async function sendMessage() {
                 "A resposta demorou mais do que o esperado. O servidor pode estar iniciando. Tente novamente em alguns segundos.";
         }
 
-        console.error(
-            "Erro ao enviar mensagem:",
-            error
-        );
+
+        /*
+         * Não registra o objeto completo do erro.
+         *
+         * Isso reduz o risco de informações desnecessárias
+         * aparecerem no console do navegador.
+         */
+
+        if (error) {
+            console.warn(
+                "Assistente de Estudos: falha ao processar a solicitação."
+            );
+        }
 
 
         /* -----------------------------------------------------
