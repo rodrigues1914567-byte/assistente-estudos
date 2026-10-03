@@ -3,8 +3,14 @@
    Estilo principal
    ========================================================= */
 
+
+/* =========================================================
+   VARIÁVEIS
+   ========================================================= */
+
 :root {
     --background: #080b12;
+
     --surface: #0f1622;
     --surface-light: #131d2b;
     --surface-hover: #172438;
@@ -26,7 +32,8 @@
     --radius-medium: 16px;
     --radius-large: 22px;
 
-    --shadow: 0 20px 50px rgba(0, 0, 0, 0.28);
+    --shadow:
+        0 20px 50px rgba(0, 0, 0, 0.28);
 }
 
 
@@ -68,6 +75,58 @@ body {
         sans-serif;
 
     line-height: 1.6;
+
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+
+/* =========================================================
+   ELEMENTOS GERAIS
+   ========================================================= */
+
+button,
+input {
+    font: inherit;
+}
+
+
+button {
+    -webkit-tap-highlight-color: transparent;
+}
+
+
+button:disabled {
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   ACESSIBILIDADE
+   ========================================================= */
+
+/*
+ * Elemento visualmente oculto, mas disponível
+ * para leitores de tela.
+ */
+
+.sr-only {
+    position: absolute;
+
+    width: 1px;
+    height: 1px;
+
+    padding: 0;
+    margin: -1px;
+
+    overflow: hidden;
+
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+
+    white-space: nowrap;
+
+    border: 0;
 }
 
 
@@ -90,11 +149,17 @@ body {
     top: 0;
     z-index: 10;
 
-    background: rgba(8, 11, 18, 0.88);
+    background:
+        rgba(8, 11, 18, 0.88);
 
-    border-bottom: 1px solid var(--border);
+    border-bottom:
+        1px solid var(--border);
 
-    backdrop-filter: blur(18px);
+    backdrop-filter:
+        blur(18px);
+
+    -webkit-backdrop-filter:
+        blur(18px);
 }
 
 
@@ -103,6 +168,8 @@ body {
     align-items: center;
 
     gap: 12px;
+
+    min-width: 0;
 }
 
 
@@ -114,9 +181,13 @@ body {
     align-items: center;
     justify-content: center;
 
-    background: rgba(59, 130, 246, 0.12);
+    flex-shrink: 0;
 
-    border: 1px solid rgba(96, 165, 250, 0.25);
+    background:
+        rgba(59, 130, 246, 0.12);
+
+    border:
+        1px solid rgba(96, 165, 250, 0.25);
 
     border-radius: 12px;
 
@@ -127,12 +198,16 @@ body {
 .brand div {
     display: flex;
     flex-direction: column;
+
+    min-width: 0;
 }
 
 
 .brand strong {
     font-size: 15px;
     font-weight: 700;
+
+    line-height: 1.3;
 }
 
 
@@ -140,8 +215,14 @@ body {
     color: var(--text-muted);
 
     font-size: 12px;
+
+    line-height: 1.3;
 }
 
+
+/* =========================================================
+   BOTÃO DE LIMPAR CONVERSA
+   ========================================================= */
 
 .menu-button {
     width: 42px;
@@ -151,9 +232,12 @@ body {
     align-items: center;
     justify-content: center;
 
+    flex-shrink: 0;
+
     background: transparent;
 
-    border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
     border-radius: 10px;
 
@@ -166,14 +250,35 @@ body {
     transition:
         background 0.2s ease,
         border-color 0.2s ease,
-        color 0.2s ease;
+        color 0.2s ease,
+        opacity 0.2s ease,
+        transform 0.2s ease;
 }
 
 
 .menu-button:hover {
     background: var(--surface);
-    border-color: var(--border-light);
+
+    border-color:
+        var(--border-light);
+
     color: var(--text);
+
+    transform: translateY(-1px);
+}
+
+
+.menu-button:active {
+    transform: translateY(0);
+}
+
+
+.menu-button:disabled {
+    opacity: 0.45;
+
+    cursor: not-allowed;
+
+    transform: none;
 }
 
 
@@ -206,22 +311,29 @@ body {
 .welcome-tag {
     display: inline-flex;
 
+    align-items: center;
+
     padding: 6px 12px;
 
     margin-bottom: 18px;
 
-    background: rgba(59, 130, 246, 0.1);
+    background:
+        rgba(59, 130, 246, 0.1);
 
-    border: 1px solid rgba(96, 165, 250, 0.22);
+    border:
+        1px solid rgba(96, 165, 250, 0.22);
 
     border-radius: 999px;
 
-    color: var(--primary-light);
+    color:
+        var(--primary-light);
 
     font-size: 11px;
     font-weight: 700;
 
     letter-spacing: 0.12em;
+
+    line-height: 1.2;
 }
 
 
@@ -230,7 +342,8 @@ body {
 
     margin: 0 auto;
 
-    font-size: clamp(38px, 6vw, 64px);
+    font-size:
+        clamp(38px, 6vw, 64px);
 
     line-height: 1.08;
 
@@ -243,7 +356,8 @@ body {
 .welcome h1 span {
     display: block;
 
-    color: var(--primary-light);
+    color:
+        var(--primary-light);
 }
 
 
@@ -252,9 +366,12 @@ body {
 
     margin: 20px auto 0;
 
-    color: var(--text-secondary);
+    color:
+        var(--text-secondary);
 
     font-size: 16px;
+
+    line-height: 1.7;
 }
 
 
@@ -269,13 +386,17 @@ body {
 
     overflow: hidden;
 
-    background: rgba(15, 22, 34, 0.92);
+    background:
+        rgba(15, 22, 34, 0.92);
 
-    border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
-    border-radius: var(--radius-large);
+    border-radius:
+        var(--radius-large);
 
-    box-shadow: var(--shadow);
+    box-shadow:
+        var(--shadow);
 }
 
 
@@ -293,9 +414,11 @@ body {
 
     gap: 12px;
 
-    border-bottom: 1px solid var(--border);
+    border-bottom:
+        1px solid var(--border);
 
-    background: rgba(13, 20, 30, 0.75);
+    background:
+        rgba(13, 20, 30, 0.75);
 }
 
 
@@ -309,9 +432,11 @@ body {
 
     flex-shrink: 0;
 
-    background: rgba(59, 130, 246, 0.12);
+    background:
+        rgba(59, 130, 246, 0.12);
 
-    border: 1px solid rgba(96, 165, 250, 0.22);
+    border:
+        1px solid rgba(96, 165, 250, 0.22);
 
     border-radius: 12px;
 
@@ -322,18 +447,25 @@ body {
 .chat-header > div:nth-child(2) {
     display: flex;
     flex-direction: column;
+
+    min-width: 0;
 }
 
 
 .chat-header strong {
     font-size: 14px;
+
+    line-height: 1.3;
 }
 
 
 .chat-header > div:nth-child(2) span {
-    color: var(--text-muted);
+    color:
+        var(--text-muted);
 
     font-size: 12px;
+
+    line-height: 1.3;
 }
 
 
@@ -345,7 +477,10 @@ body {
 
     gap: 7px;
 
-    color: var(--text-muted);
+    flex-shrink: 0;
+
+    color:
+        var(--text-muted);
 
     font-size: 12px;
 }
@@ -355,11 +490,15 @@ body {
     width: 7px;
     height: 7px;
 
+    flex-shrink: 0;
+
     border-radius: 50%;
 
-    background: var(--success);
+    background:
+        var(--success);
 
-    box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
+    box-shadow:
+        0 0 10px rgba(34, 197, 94, 0.5);
 }
 
 
@@ -371,6 +510,8 @@ body {
     min-height: 360px;
 
     padding: 30px 28px;
+
+    overflow-wrap: anywhere;
 
     background:
         linear-gradient(
@@ -387,8 +528,19 @@ body {
     gap: 12px;
 
     max-width: 720px;
+
+    margin-bottom: 22px;
 }
 
+
+.message:last-child {
+    margin-bottom: 0;
+}
+
+
+/* =========================================================
+   AVATAR DAS MENSAGENS
+   ========================================================= */
 
 .message-avatar {
     width: 34px;
@@ -400,9 +552,11 @@ body {
 
     flex-shrink: 0;
 
-    background: rgba(59, 130, 246, 0.1);
+    background:
+        rgba(59, 130, 246, 0.1);
 
-    border: 1px solid rgba(96, 165, 250, 0.18);
+    border:
+        1px solid rgba(96, 165, 250, 0.18);
 
     border-radius: 10px;
 
@@ -410,7 +564,13 @@ body {
 }
 
 
+/* =========================================================
+   CONTEÚDO DA MENSAGEM
+   ========================================================= */
+
 .message-content {
+    min-width: 0;
+
     padding-top: 2px;
 }
 
@@ -420,26 +580,95 @@ body {
 
     margin-bottom: 7px;
 
-    color: var(--primary-light);
+    color:
+        var(--primary-light);
 
     font-size: 12px;
 
     font-weight: 700;
+
+    line-height: 1.3;
 }
 
 
 .message-content p {
-    color: var(--text-secondary);
+    color:
+        var(--text-secondary);
 
     font-size: 15px;
 
     line-height: 1.7;
+
+    overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   MENSAGEM DO USUÁRIO
+   ========================================================= */
+
+.user-message {
+    margin-left: auto;
+
+    justify-content: flex-end;
+
+    max-width: min(80%, 620px);
+}
+
+
+.user-message .message-content {
+    padding:
+        12px 14px;
+
+    background:
+        rgba(59, 130, 246, 0.12);
+
+    border:
+        1px solid rgba(96, 165, 250, 0.18);
+
+    border-radius:
+        14px 14px 4px 14px;
+}
+
+
+.user-message .message-name {
+    margin-bottom: 5px;
+
+    color:
+        var(--primary-light);
+
+    text-align: right;
+}
+
+
+.user-message .message-content p {
+    color:
+        var(--text);
+}
+
+
+/* =========================================================
+   MENSAGEM DO ASSISTENTE
+   ========================================================= */
+
+.assistant-message {
+    margin-right: auto;
+}
+
+
+.assistant-message .message-content {
+    max-width: 100%;
 }
 
 
 /* =========================================================
    INDICADOR DE CARREGAMENTO
    ========================================================= */
+
+.loading-message {
+    margin-bottom: 22px;
+}
+
 
 .loading-text {
     display: flex;
@@ -459,39 +688,49 @@ body {
 
     border-radius: 50%;
 
-    background: var(--primary-light);
+    background:
+        var(--primary-light);
 
-    animation: assistantTyping 1.2s infinite ease-in-out;
+    animation:
+        assistantTyping 1.2s
+        infinite ease-in-out;
 }
 
 
 .loading-text span:nth-child(2) {
-    animation-delay: 0.15s;
+    animation-delay:
+        0.15s;
 }
 
 
 .loading-text span:nth-child(3) {
-    animation-delay: 0.3s;
+    animation-delay:
+        0.3s;
 }
 
 
 @keyframes assistantTyping {
+
     0%,
     60%,
     100% {
         opacity: 0.35;
-        transform: translateY(0);
+
+        transform:
+            translateY(0);
     }
 
     30% {
         opacity: 1;
-        transform: translateY(-3px);
+
+        transform:
+            translateY(-3px);
     }
 }
 
 
 /* =========================================================
-   SUGGESTIONS
+   SUGESTÕES
    ========================================================= */
 
 .suggestions {
@@ -507,19 +746,25 @@ body {
 
 
 .suggestions button {
-    padding: 10px 14px;
+    padding:
+        10px 14px;
 
-    background: rgba(19, 29, 43, 0.8);
+    background:
+        rgba(19, 29, 43, 0.8);
 
-    border: 1px solid var(--border);
+    border:
+        1px solid var(--border);
 
     border-radius: 10px;
 
-    color: var(--text-secondary);
+    color:
+        var(--text-secondary);
 
     font-family: inherit;
 
     font-size: 12px;
+
+    line-height: 1.4;
 
     cursor: pointer;
 
@@ -527,18 +772,38 @@ body {
         background 0.2s ease,
         border-color 0.2s ease,
         color 0.2s ease,
-        transform 0.2s ease;
+        transform 0.2s ease,
+        opacity 0.2s ease;
 }
 
 
 .suggestions button:hover {
-    background: var(--surface-hover);
+    background:
+        var(--surface-hover);
 
-    border-color: rgba(96, 165, 250, 0.35);
+    border-color:
+        rgba(96, 165, 250, 0.35);
 
-    color: var(--text);
+    color:
+        var(--text);
 
-    transform: translateY(-1px);
+    transform:
+        translateY(-1px);
+}
+
+
+.suggestions button:active {
+    transform:
+        translateY(0);
+}
+
+
+.suggestions button:disabled {
+    opacity: 0.45;
+
+    cursor: not-allowed;
+
+    transform: none;
 }
 
 
@@ -555,13 +820,30 @@ body {
 
     margin: 0 20px;
 
-    padding: 8px 8px 8px 16px;
+    padding:
+        8px 8px 8px 16px;
 
-    background: #0a1019;
+    background:
+        #0a1019;
 
-    border: 1px solid var(--border-light);
+    border:
+        1px solid var(--border-light);
 
     border-radius: 14px;
+
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+
+.input-area:focus-within {
+    border-color:
+        rgba(96, 165, 250, 0.55);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(59, 130, 246, 0.08);
 }
 
 
@@ -570,24 +852,37 @@ body {
 
     min-width: 0;
 
-    padding: 10px 0;
+    padding:
+        10px 0;
 
-    background: transparent;
+    background:
+        transparent;
 
     border: none;
 
     outline: none;
 
-    color: var(--text);
+    color:
+        var(--text);
 
     font-family: inherit;
 
     font-size: 14px;
+
+    line-height: 1.4;
 }
 
 
 .input-area input::placeholder {
-    color: var(--text-muted);
+    color:
+        var(--text-muted);
+}
+
+
+.input-area input:disabled {
+    opacity: 0.6;
+
+    cursor: not-allowed;
 }
 
 
@@ -601,7 +896,8 @@ body {
 
     flex-shrink: 0;
 
-    background: var(--primary);
+    background:
+        var(--primary);
 
     border: none;
 
@@ -621,9 +917,17 @@ body {
 
 
 .input-area button:hover {
-    background: var(--primary-dark);
+    background:
+        var(--primary-dark);
 
-    transform: translateY(-1px);
+    transform:
+        translateY(-1px);
+}
+
+
+.input-area button:active {
+    transform:
+        translateY(0);
 }
 
 
@@ -646,7 +950,8 @@ body {
     margin-top: 14px;
     margin-bottom: 8px;
 
-    color: var(--text);
+    color:
+        var(--text);
 
     line-height: 1.35;
 }
@@ -667,16 +972,24 @@ body {
 }
 
 
+/* =========================================================
+   CÓDIGO INLINE
+   ========================================================= */
+
 .message-content code {
-    padding: 2px 6px;
+    padding:
+        2px 6px;
 
-    background: rgba(96, 165, 250, 0.1);
+    background:
+        rgba(96, 165, 250, 0.1);
 
-    border: 1px solid rgba(96, 165, 250, 0.15);
+    border:
+        1px solid rgba(96, 165, 250, 0.15);
 
     border-radius: 5px;
 
-    color: var(--primary-light);
+    color:
+        var(--primary-light);
 
     font-family:
         Consolas,
@@ -684,7 +997,62 @@ body {
         "Courier New",
         monospace;
 
-    font-size: 0.9em;
+    font-size:
+        0.9em;
+}
+
+
+/* =========================================================
+   BLOCO DE CÓDIGO
+   ========================================================= */
+
+.message-content pre {
+    max-width: 100%;
+
+    margin:
+        12px 0;
+
+    padding:
+        14px 16px;
+
+    overflow-x: auto;
+
+    background:
+        #070b12;
+
+    border:
+        1px solid var(--border);
+
+    border-radius:
+        10px;
+
+    white-space: pre;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+.message-content pre code {
+    display: block;
+
+    padding: 0;
+
+    overflow: visible;
+
+    background: transparent;
+
+    border: none;
+
+    border-radius: 0;
+
+    color:
+        var(--text-secondary);
+
+    font-size: 13px;
+
+    line-height: 1.6;
+
+    white-space: pre;
 }
 
 
@@ -693,13 +1061,17 @@ body {
    ========================================================= */
 
 .disclaimer {
-    padding: 13px 20px 18px;
+    padding:
+        13px 20px 18px;
 
-    color: var(--text-muted);
+    color:
+        var(--text-muted);
 
     text-align: center;
 
     font-size: 10px;
+
+    line-height: 1.5;
 }
 
 
@@ -708,16 +1080,19 @@ body {
    ========================================================= */
 
 .footer {
-    padding: 25px 20px 35px;
+    padding:
+        25px 20px 35px;
 
-    border-top: 1px solid var(--border);
+    border-top:
+        1px solid var(--border);
 
     text-align: center;
 }
 
 
 .footer p {
-    color: var(--text-secondary);
+    color:
+        var(--text-secondary);
 
     font-size: 13px;
 
@@ -730,21 +1105,28 @@ body {
 
     margin-top: 3px;
 
-    color: var(--text-muted);
+    color:
+        var(--text-muted);
 
     font-size: 11px;
 }
 
 
 /* =========================================================
-   ACESSIBILIDADE E FOCO
+   FOCO ACESSÍVEL
    ========================================================= */
 
-button:focus-visible,
-input:focus-visible {
-    outline: 2px solid var(--primary-light);
+button:focus-visible {
+    outline:
+        2px solid var(--primary-light);
 
-    outline-offset: 2px;
+    outline-offset:
+        2px;
+}
+
+
+input:focus-visible {
+    outline: none;
 }
 
 
@@ -753,22 +1135,32 @@ input:focus-visible {
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
+
     html {
         scroll-behavior: auto;
     }
 
+
     *,
     *::before,
     *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
+        animation-duration:
+            0.01ms !important;
+
+        animation-iteration-count:
+            1 !important;
+
+        transition-duration:
+            0.01ms !important;
+
+        scroll-behavior:
+            auto !important;
     }
 }
 
 
 /* =========================================================
-   RESPONSIVIDADE
+   RESPONSIVIDADE — TABLET / CELULAR
    ========================================================= */
 
 @media (max-width: 700px) {
@@ -776,7 +1168,13 @@ input:focus-visible {
     .topbar {
         min-height: 64px;
 
-        padding: 0 4%;
+        padding:
+            0 4%;
+    }
+
+
+    .brand {
+        gap: 9px;
     }
 
 
@@ -800,10 +1198,19 @@ input:focus-visible {
     }
 
 
+    .menu-button {
+        width: 38px;
+        height: 38px;
+
+        font-size: 17px;
+    }
+
+
     .main {
         width: 92%;
 
-        padding: 48px 0 60px;
+        padding:
+            48px 0 60px;
     }
 
 
@@ -820,7 +1227,8 @@ input:focus-visible {
 
 
     .welcome h1 {
-        font-size: clamp(34px, 11vw, 48px);
+        font-size:
+            clamp(34px, 11vw, 48px);
     }
 
 
@@ -839,7 +1247,8 @@ input:focus-visible {
     .chat-header {
         min-height: 64px;
 
-        padding: 12px 14px;
+        padding:
+            12px 14px;
     }
 
 
@@ -848,13 +1257,33 @@ input:focus-visible {
         height: 38px;
 
         border-radius: 10px;
+
+        font-size: 18px;
     }
 
 
     .messages {
         min-height: 330px;
 
-        padding: 24px 18px;
+        padding:
+            24px 18px;
+    }
+
+
+    .message {
+        gap: 9px;
+
+        max-width: 100%;
+    }
+
+
+    .message-avatar {
+        width: 32px;
+        height: 32px;
+
+        border-radius: 9px;
+
+        font-size: 15px;
     }
 
 
@@ -863,8 +1292,14 @@ input:focus-visible {
     }
 
 
+    .user-message {
+        max-width: 90%;
+    }
+
+
     .suggestions {
-        margin: 24px 0 0 46px;
+        margin:
+            24px 0 0 41px;
 
         gap: 8px;
     }
@@ -873,14 +1308,17 @@ input:focus-visible {
     .suggestions button {
         font-size: 11px;
 
-        padding: 9px 11px;
+        padding:
+            9px 11px;
     }
 
 
     .input-area {
-        margin: 0 12px;
+        margin:
+            0 12px;
 
-        padding-left: 13px;
+        padding-left:
+            13px;
     }
 
 
@@ -896,6 +1334,10 @@ input:focus-visible {
     }
 }
 
+
+/* =========================================================
+   RESPONSIVIDADE — CELULARES PEQUENOS
+   ========================================================= */
 
 @media (max-width: 420px) {
 
@@ -915,7 +1357,18 @@ input:focus-visible {
 
 
     .messages {
-        padding: 22px 15px;
+        padding:
+            22px 15px;
+    }
+
+
+    .message {
+        margin-bottom: 18px;
+    }
+
+
+    .user-message {
+        max-width: 94%;
     }
 
 
@@ -927,7 +1380,8 @@ input:focus-visible {
 
 
     .suggestions button {
-        flex: 1 1 calc(50% - 8px);
+        flex:
+            1 1 calc(50% - 8px);
 
         min-height: 42px;
     }
@@ -935,5 +1389,52 @@ input:focus-visible {
 
     .input-area input {
         font-size: 13px;
+    }
+
+
+    .input-area {
+        gap: 7px;
+
+        padding-left: 11px;
+    }
+}
+
+
+/* =========================================================
+   CELULARES MUITO PEQUENOS
+   ========================================================= */
+
+@media (max-width: 340px) {
+
+    .brand span {
+        display: none;
+    }
+
+
+    .welcome h1 {
+        font-size: 32px;
+    }
+
+
+    .welcome p {
+        font-size: 12px;
+    }
+
+
+    .messages {
+        padding:
+            20px 12px;
+    }
+
+
+    .suggestions button {
+        flex:
+            1 1 100%;
+    }
+
+
+    .input-area {
+        margin:
+            0 9px;
     }
 }
