@@ -1,13 +1,39 @@
-const API_URL = "https://assistente-estudos-fsq1.onrender.com/api/chat/";
+"use strict";
+
+
+/* =========================================================
+   CONFIGURAÇÃO
+   ========================================================= */
+
+const API_URL =
+    "https://assistente-estudos-fsq1.onrender.com/api/chat/";
+
+const MAX_MESSAGE_LENGTH = 4000;
+
+const MAX_HISTORY_MESSAGES = 30;
+
 
 /* =========================================================
    ELEMENTOS DA INTERFACE
    ========================================================= */
 
-const messagesContainer = document.querySelector(".messages");
-const input = document.querySelector(".input-area input");
-const sendButton = document.querySelector(".input-area button");
-const suggestionButtons = document.querySelectorAll(".suggestions button");
+const messagesContainer =
+    document.querySelector(".messages");
+
+const input =
+    document.querySelector(".input-area input");
+
+const sendButton =
+    document.querySelector(".input-area button");
+
+const chatForm =
+    document.querySelector("#chat-form");
+
+const clearButton =
+    document.querySelector(".menu-button");
+
+const suggestionButtons =
+    document.querySelectorAll(".suggestions button");
 
 
 /* =========================================================
@@ -18,12 +44,28 @@ const conversationHistory = [];
 
 
 /* =========================================================
+   ESTADO DA APLICAÇÃO
+   ========================================================= */
+
+let isSending = false;
+
+
+/* =========================================================
    SEGURANÇA
    ========================================================= */
 
+/*
+ * Escapa o conteúdo antes de transformá-lo em HTML.
+ * Isso impede que respostas da IA executem HTML ou JavaScript
+ * diretamente dentro da página.
+ */
+
 function escapeHtml(text) {
+
     const div = document.createElement("div");
-    div.textContent = text;
+
+    div.textContent = String(text);
+
     return div.innerHTML;
 }
 
@@ -33,44 +75,77 @@ function escapeHtml(text) {
    ========================================================= */
 
 function formatMessage(text) {
-    let formattedText = escapeHtml(text);
 
-    // Negrito
-    formattedText = formattedText.replace(
-        /\*\*(.*?)\*\*/g,
-        "<strong>$1</strong>"
-    );
+    let formattedText =
+        escapeHtml(text);
 
-    // Código
-    formattedText = formattedText.replace(
-        /`([^`]+)`/g,
-        "<code>$1</code>"
-    );
 
-    // Títulos
-    formattedText = formattedText.replace(
-        /^### (.*?)$/gm,
-        "<h4>$1</h4>"
-    );
+    /*
+     * Negrito
+     */
 
-    formattedText = formattedText.replace(
-        /^## (.*?)$/gm,
-        "<h3>$1</h3>"
-    );
+    formattedText =
+        formattedText.replace(
+            /\*\*(.*?)\*\*/g,
+            "<strong>$1</strong>"
+        );
 
-    formattedText = formattedText.replace(
-        /^# (.*?)$/gm,
-        "<h2>$1</h2>"
-    );
 
-    // Listas com hífen
-    formattedText = formattedText.replace(
-        /^- (.*?)$/gm,
-        "• $1"
-    );
+    /*
+     * Código inline
+     */
 
-    // Quebras de linha
-    formattedText = formattedText.replace(/\n/g, "<br>");
+    formattedText =
+        formattedText.replace(
+            /`([^`]+)`/g,
+            "<code>$1</code>"
+        );
+
+
+    /*
+     * Títulos Markdown
+     */
+
+    formattedText =
+        formattedText.replace(
+            /^### (.*?)$/gm,
+            "<h4>$1</h4>"
+        );
+
+    formattedText =
+        formattedText.replace(
+            /^## (.*?)$/gm,
+            "<h3>$1</h3>"
+        );
+
+    formattedText =
+        formattedText.replace(
+            /^# (.*?)$/gm,
+            "<h2>$1</h2>"
+        );
+
+
+    /*
+     * Listas com hífen
+     */
+
+    formattedText =
+        formattedText.replace(
+            /^- (.*?)$/gm,
+            "• $1"
+        );
+
+
+    /*
+     * Quebras de linha
+     */
+
+    formattedText =
+        formattedText.replace(
+            /\n/g,
+            "<br>"
+        );
+
 
     return formattedText;
 }
@@ -81,49 +156,117 @@ function formatMessage(text) {
    ========================================================= */
 
 function addMessage(text, type) {
-    const message = document.createElement("div");
-    message.classList.add("message");
 
-    const messageContent = document.createElement("div");
-    messageContent.classList.add("message-content");
+    const message =
+        document.createElement("div");
 
-    const messageName = document.createElement("span");
-    messageName.classList.add("message-name");
+    message.classList.add(
+        "message"
+    );
 
-    const messageText = document.createElement("p");
+
+    const messageContent =
+        document.createElement("div");
+
+    messageContent.classList.add(
+        "message-content"
+    );
+
+
+    const messageName =
+        document.createElement("span");
+
+    messageName.classList.add(
+        "message-name"
+    );
+
+
+    const messageText =
+        document.createElement("p");
+
 
     if (type === "user") {
-        message.classList.add("user-message");
 
-        messageName.textContent = "Você";
-        messageText.textContent = text;
+        message.classList.add(
+            "user-message"
+        );
 
-        messageContent.appendChild(messageName);
-        messageContent.appendChild(messageText);
+        messageName.textContent =
+            "Você";
 
-        message.appendChild(messageContent);
+        messageText.textContent =
+            text;
+
+
+        messageContent.appendChild(
+            messageName
+        );
+
+        messageContent.appendChild(
+            messageText
+        );
+
+        message.appendChild(
+            messageContent
+        );
 
     } else {
-        message.classList.add("assistant-message");
 
-        const avatar = document.createElement("div");
-        avatar.classList.add("message-avatar");
-        avatar.textContent = "🤖";
+        message.classList.add(
+            "assistant-message"
+        );
 
-        messageName.textContent = "Assistente";
 
-        messageText.innerHTML = formatMessage(text);
+        const avatar =
+            document.createElement("div");
 
-        messageContent.appendChild(messageName);
-        messageContent.appendChild(messageText);
+        avatar.classList.add(
+            "message-avatar"
+        );
 
-        message.appendChild(avatar);
-        message.appendChild(messageContent);
+        avatar.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+        avatar.textContent =
+            "🤖";
+
+
+        messageName.textContent =
+            "Assistente";
+
+
+        messageText.innerHTML =
+            formatMessage(text);
+
+
+        messageContent.appendChild(
+            messageName
+        );
+
+        messageContent.appendChild(
+            messageText
+        );
+
+
+        message.appendChild(
+            avatar
+        );
+
+        message.appendChild(
+            messageContent
+        );
     }
 
-    messagesContainer.appendChild(message);
 
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    messagesContainer.appendChild(
+        message
+    );
+
+
+    messagesContainer.scrollTop =
+        messagesContainer.scrollHeight;
 }
 
 
@@ -132,7 +275,10 @@ function addMessage(text, type) {
    ========================================================= */
 
 function showLoading() {
-    const loadingMessage = document.createElement("div");
+
+    const loadingMessage =
+        document.createElement("div");
+
 
     loadingMessage.classList.add(
         "message",
@@ -140,25 +286,249 @@ function showLoading() {
         "loading-message"
     );
 
+
+    loadingMessage.setAttribute(
+        "aria-label",
+        "Assistente está processando a resposta"
+    );
+
+
     loadingMessage.innerHTML = `
-        <div class="message-avatar">🤖</div>
+        <div
+            class="message-avatar"
+            aria-hidden="true"
+        >
+            🤖
+        </div>
 
         <div class="message-content">
-            <span class="message-name">Assistente</span>
 
-            <p class="loading-text">
+            <span class="message-name">
+                Assistente
+            </span>
+
+            <p
+                class="loading-text"
+                aria-hidden="true"
+            >
                 <span></span>
                 <span></span>
                 <span></span>
             </p>
+
         </div>
     `;
 
-    messagesContainer.appendChild(loadingMessage);
 
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    messagesContainer.appendChild(
+        loadingMessage
+    );
+
+
+    messagesContainer.scrollTop =
+        messagesContainer.scrollHeight;
+
 
     return loadingMessage;
+}
+
+
+/* =========================================================
+   CONTROLE DO BOTÃO
+   ========================================================= */
+
+function setSendingState(sending) {
+
+    isSending = sending;
+
+    sendButton.disabled =
+        sending;
+
+    input.disabled =
+        sending;
+
+    suggestionButtons.forEach(
+        (button) => {
+            button.disabled =
+                sending;
+        }
+    );
+}
+
+
+/* =========================================================
+   HISTÓRICO
+   ========================================================= */
+
+function addToHistory(role, content) {
+
+    conversationHistory.push({
+        role,
+        content
+    });
+
+
+    /*
+     * Mantém somente as últimas mensagens.
+     * Evita que a requisição cresça indefinidamente.
+     */
+
+    if (
+        conversationHistory.length >
+        MAX_HISTORY_MESSAGES
+    ) {
+
+        conversationHistory.splice(
+            0,
+            conversationHistory.length -
+            MAX_HISTORY_MESSAGES
+        );
+    }
+}
+
+
+/* =========================================================
+   LIMPAR CONVERSA
+   ========================================================= */
+
+function clearConversation() {
+
+    if (isSending) {
+        return;
+    }
+
+
+    const confirmed =
+        window.confirm(
+            "Deseja limpar a conversa atual?"
+        );
+
+
+    if (!confirmed) {
+        return;
+    }
+
+
+    conversationHistory.length = 0;
+
+
+    /*
+     * Remove todas as mensagens criadas
+     * depois da mensagem inicial.
+     */
+
+    const dynamicMessages =
+        messagesContainer.querySelectorAll(
+            ".message:not(.assistant-message:first-child)"
+        );
+
+
+    dynamicMessages.forEach(
+        (message) => {
+            message.remove();
+        }
+    );
+
+
+    /*
+     * Garante que a mensagem inicial
+     * continue existindo.
+     */
+
+    const firstMessage =
+        messagesContainer.querySelector(
+            ".message.assistant-message"
+        );
+
+
+    if (!firstMessage) {
+
+        const welcomeMessage =
+            document.createElement("div");
+
+        welcomeMessage.className =
+            "message assistant-message";
+
+        welcomeMessage.innerHTML = `
+            <div
+                class="message-avatar"
+                aria-hidden="true"
+            >
+                🤖
+            </div>
+
+            <div class="message-content">
+
+                <span class="message-name">
+                    Assistente
+                </span>
+
+                <p>
+                    Olá! 👋
+                    <br><br>
+                    Sou seu assistente de estudos.
+                    Pode me perguntar sobre qualquer
+                    assunto que esteja estudando.
+                </p>
+
+            </div>
+        `;
+
+        messagesContainer.prepend(
+            welcomeMessage
+        );
+    }
+
+
+    /*
+     * Recoloca as sugestões.
+     */
+
+    const existingSuggestions =
+        messagesContainer.querySelector(
+            ".suggestions"
+        );
+
+
+    if (!existingSuggestions) {
+
+        const suggestions =
+            document.createElement("div");
+
+        suggestions.className =
+            "suggestions";
+
+        suggestions.innerHTML = `
+            <button type="button">
+                🧠 Explique um assunto
+            </button>
+
+            <button type="button">
+                📝 Crie exercícios
+            </button>
+
+            <button type="button">
+                📖 Faça um resumo
+            </button>
+
+            <button type="button">
+                💡 Tire uma dúvida
+            </button>
+        `;
+
+        messagesContainer.appendChild(
+            suggestions
+        );
+    }
+
+
+    input.value = "";
+
+    input.disabled = false;
+
+    sendButton.disabled = false;
+
+    input.focus();
 }
 
 
@@ -167,126 +537,290 @@ function showLoading() {
    ========================================================= */
 
 async function sendMessage() {
-    const text = input.value.trim();
 
-    if (text === "") {
+    if (isSending) {
         return;
     }
 
-    addMessage(text, "user");
+
+    const text =
+        input.value.trim();
+
+
+    if (!text) {
+        input.focus();
+        return;
+    }
+
+
+    if (
+        text.length >
+        MAX_MESSAGE_LENGTH
+    ) {
+
+        addMessage(
+            "Sua mensagem é muito longa. Tente enviar uma mensagem com até 4.000 caracteres.",
+            "assistant"
+        );
+
+        return;
+    }
+
+
+    /*
+     * Mostra a mensagem do usuário.
+     */
+
+    addMessage(
+        text,
+        "user"
+    );
+
 
     input.value = "";
-    sendButton.disabled = true;
 
-    // Mostra o indicador enquanto a IA responde.
-    const loadingMessage = showLoading();
+    setSendingState(true);
+
+
+    /*
+     * Mostra o carregamento.
+     */
+
+    const loadingMessage =
+        showLoading();
+
 
     try {
-        const response = await fetch(API_URL, {
-            method: "POST",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+        const response =
+            await fetch(
+                API_URL,
+                {
+                    method: "POST",
 
-            body: JSON.stringify({
-                message: text,
-                messages: conversationHistory
-            })
-        });
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-        const data = await response.json();
+                    body: JSON.stringify({
+                        message: text,
 
-        if (!response.ok) {
+                        messages:
+                            conversationHistory
+                    })
+                }
+            );
+
+
+        /*
+         * Tenta interpretar a resposta
+         * como JSON.
+         */
+
+        let data;
+
+        try {
+
+            data =
+                await response.json();
+
+        } catch (jsonError) {
+
             throw new Error(
-                data.error || "Erro ao processar a mensagem."
+                "O servidor retornou uma resposta inválida."
             );
         }
 
-        if (!data.response) {
+
+        /*
+         * Verifica erros HTTP.
+         */
+
+        if (!response.ok) {
+
+            throw new Error(
+                data.error ||
+                "Erro ao processar a mensagem."
+            );
+        }
+
+
+        /*
+         * Verifica se a API retornou
+         * uma resposta válida.
+         */
+
+        if (
+            !data ||
+            typeof data.response !== "string" ||
+            !data.response.trim()
+        ) {
+
             throw new Error(
                 "O servidor não retornou uma resposta válida."
             );
         }
 
-        // Remove o indicador de carregamento.
+
+        /*
+         * Remove o carregamento.
+         */
+
         loadingMessage.remove();
 
-        // Salva a pergunta no histórico.
-        conversationHistory.push({
-            role: "user",
-            content: text
-        });
 
-        // Mostra a resposta.
-        addMessage(data.response, "assistant");
+        /*
+         * Salva a pergunta.
+         */
 
-        // Salva a resposta da IA no histórico.
-        conversationHistory.push({
-            role: "assistant",
-            content: data.response
-        });
+        addToHistory(
+            "user",
+            text
+        );
 
-    } catch (error) {
-        console.error("Erro:", error);
 
-        // Remove o indicador de carregamento.
-        loadingMessage.remove();
+        /*
+         * Mostra a resposta.
+         */
 
         addMessage(
-            "Não foi possível conectar ao servidor. Tente novamente em alguns segundos.",
+            data.response,
             "assistant"
         );
 
+
+        /*
+         * Salva a resposta da IA.
+         */
+
+        addToHistory(
+            "assistant",
+            data.response
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Erro ao enviar mensagem:",
+            error
+        );
+
+
+        /*
+         * Remove o carregamento
+         * se ele ainda estiver na página.
+         */
+
+        if (
+            loadingMessage &&
+            loadingMessage.isConnected
+        ) {
+            loadingMessage.remove();
+        }
+
+
+        addMessage(
+            "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente em alguns segundos.",
+            "assistant"
+        );
+
+
     } finally {
-        sendButton.disabled = false;
+
+        setSendingState(false);
+
         input.focus();
     }
 }
 
 
 /* =========================================================
-   BOTÃO ENVIAR
+   FORMULÁRIO
    ========================================================= */
 
-sendButton.addEventListener("click", sendMessage);
+chatForm.addEventListener(
+    "submit",
+    function (event) {
+
+        event.preventDefault();
+
+        sendMessage();
+    }
+);
 
 
 /* =========================================================
-   ENTER PARA ENVIAR
+   LIMPAR CONVERSA
    ========================================================= */
 
-input.addEventListener("keydown", function (event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-        sendMessage();
-    }
-});
+clearButton.addEventListener(
+    "click",
+    clearConversation
+);
 
 
 /* =========================================================
    BOTÕES DE SUGESTÃO
    ========================================================= */
 
-suggestionButtons.forEach((button) => {
-    button.addEventListener("click", function () {
-        const text = button.textContent.trim();
+function setupSuggestionButtons() {
 
-        const prompts = {
-            "🧠 Explique um assunto":
-                "Explique um assunto de forma simples e fácil de entender.",
+    const buttons =
+        document.querySelectorAll(
+            ".suggestions button"
+        );
 
-            "📝 Crie exercícios":
-                "Crie exercícios para eu praticar meus estudos.",
 
-            "📖 Faça um resumo":
-                "Faça um resumo de um assunto que estou estudando.",
+    buttons.forEach(
+        (button) => {
 
-            "💡 Tire uma dúvida":
-                "Tenho uma dúvida sobre um assunto e gostaria de ajuda."
-        };
+            button.addEventListener(
+                "click",
+                function () {
 
-        input.value = prompts[text] || "";
-        input.focus();
-    });
-});
+                    if (isSending) {
+                        return;
+                    }
+
+
+                    const text =
+                        button.textContent.trim();
+
+
+                    const prompts = {
+
+                        "🧠 Explique um assunto":
+                            "Explique um assunto de forma simples e fácil de entender. Primeiro pergunte qual assunto eu quero estudar.",
+
+                        "📝 Crie exercícios":
+                            "Quero praticar. Pergunte qual assunto estou estudando e depois crie exercícios adequados para eu responder.",
+
+                        "📖 Faça um resumo":
+                            "Quero fazer um resumo. Pergunte qual assunto ou texto estou estudando e depois faça um resumo claro e organizado.",
+
+                        "💡 Tire uma dúvida":
+                            "Tenho uma dúvida sobre um assunto. Ajude-me a entender o conteúdo de forma simples."
+                    };
+
+
+                    input.value =
+                        prompts[text] || "";
+
+
+                    input.focus();
+                }
+            );
+        }
+    );
+}
+
+
+/* =========================================================
+   INICIALIZAÇÃO
+   ========================================================= */
+
+setupSuggestionButtons();
+
+input.focus();
