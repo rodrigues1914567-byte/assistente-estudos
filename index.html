@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
 
@@ -8,12 +9,14 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Assistente de Estudos</title>
-
     <meta
         name="description"
-        content="Assistente de estudos com Inteligência Artificial."
+        content="Assistente de estudos com Inteligência Artificial para ajudar na compreensão de assuntos, exercícios, resumos e dúvidas."
     >
+
+    <meta name="theme-color" content="#080b12">
+
+    <title>Assistente de Estudos</title>
 
     <link
         rel="stylesheet"
@@ -26,20 +29,32 @@
     <header class="topbar">
 
         <div class="brand">
-            <span class="brand-icon">📚</span>
+
+            <span
+                class="brand-icon"
+                aria-hidden="true"
+            >
+                📚
+            </span>
 
             <div>
                 <strong>Assistente de Estudos</strong>
-                <span>Aprenda com mais clareza.</span>
+
+                <span>
+                    Aprenda com mais clareza.
+                </span>
             </div>
+
         </div>
+
 
         <button
             class="menu-button"
             type="button"
-            aria-label="Abrir menu"
+            aria-label="Limpar conversa"
+            title="Limpar conversa"
         >
-            ☰
+            ↻
         </button>
 
     </header>
@@ -47,13 +62,16 @@
 
     <main class="main">
 
-        <section class="welcome">
+        <section
+            class="welcome"
+            aria-labelledby="welcome-title"
+        >
 
             <span class="welcome-tag">
                 ASSISTENTE DE ESTUDOS
             </span>
 
-            <h1>
+            <h1 id="welcome-title">
                 O que você quer
                 <span>aprender hoje?</span>
             </h1>
@@ -66,11 +84,17 @@
         </section>
 
 
-        <section class="chat">
+        <section
+            class="chat"
+            aria-label="Chat do Assistente de Estudos"
+        >
 
             <div class="chat-header">
 
-                <div class="assistant-avatar">
+                <div
+                    class="assistant-avatar"
+                    aria-hidden="true"
+                >
                     🤖
                 </div>
 
@@ -83,18 +107,25 @@
                 </div>
 
                 <div class="status">
-                    <span></span>
+                    <span aria-hidden="true"></span>
                     Online
                 </div>
 
             </div>
 
 
-            <div class="messages">
+            <div
+                class="messages"
+                aria-live="polite"
+                aria-relevant="additions"
+            >
 
                 <div class="message assistant-message">
 
-                    <div class="message-avatar">
+                    <div
+                        class="message-avatar"
+                        aria-hidden="true"
+                    >
                         🤖
                     </div>
 
@@ -140,22 +171,29 @@
             </div>
 
 
-            <div class="input-area">
+            <form
+                class="input-area"
+                id="chat-form"
+            >
 
                 <input
                     type="text"
+                    id="chat-input"
                     placeholder="Digite sua dúvida..."
                     autocomplete="off"
+                    maxlength="4000"
+                    aria-label="Digite sua dúvida"
                 >
 
                 <button
-                    type="button"
+                    type="submit"
                     aria-label="Enviar pergunta"
                 >
                     ➤
                 </button>
 
-            </div>
+            </form>
+
 
             <p class="disclaimer">
                 O assistente é uma ferramenta de apoio aos estudos.
@@ -165,6 +203,7 @@
         </section>
 
     </main>
+
 
     <footer class="footer">
 
@@ -177,7 +216,10 @@
         </span>
 
     </footer>
-    
+
+
     <script src="js/script.js"></script>
+
 </body>
+
 </html>
