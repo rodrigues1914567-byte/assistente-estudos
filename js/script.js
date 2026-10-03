@@ -1,6 +1,5 @@
 "use strict";
 
-
 /* =========================================================
    CONFIGURAÇÃO
    ========================================================= */
@@ -9,8 +8,8 @@ const API_URL =
     "https://assistente-estudos-fsq1.onrender.com/api/chat/";
 
 const MAX_MESSAGE_LENGTH = 4000;
-
 const MAX_HISTORY_MESSAGES = 30;
+const REQUEST_TIMEOUT = 120000;
 
 
 /* =========================================================
@@ -37,6 +36,23 @@ const suggestionButtons =
 
 
 /* =========================================================
+   VERIFICAÇÃO INICIAL
+   ========================================================= */
+
+if (
+    !messagesContainer ||
+    !input ||
+    !sendButton ||
+    !chatForm ||
+    !clearButton
+) {
+    console.error(
+        "Assistente de Estudos: elementos essenciais da interface não foram encontrados."
+    );
+}
+
+
+/* =========================================================
    HISTÓRICO DA CONVERSA
    ========================================================= */
 
@@ -56,12 +72,12 @@ let isSending = false;
 
 /*
  * Escapa o conteúdo antes de transformá-lo em HTML.
- * Isso impede que respostas da IA executem HTML ou JavaScript
- * diretamente dentro da página.
+ *
+ * Isso impede que uma resposta contendo HTML ou JavaScript
+ * seja executada diretamente dentro da página.
  */
 
 function escapeHtml(text) {
-
     const div = document.createElement("div");
 
     div.textContent = String(text);
@@ -75,77 +91,74 @@ function escapeHtml(text) {
    ========================================================= */
 
 function formatMessage(text) {
-
-    let formattedText =
-        escapeHtml(text);
-
+    let formattedText = escapeHtml(text);
 
     /*
-     * Negrito
+     * Código em bloco
+     *
+     * Deve ser tratado antes do código inline para evitar
+     * conflitos entre os dois formatos.
      */
 
-    formattedText =
-        formattedText.replace(
-            /\*\*(.*?)\*\*/g,
-            "<strong>$1</strong>"
-        );
-
+    formattedText = formattedText.replace(
+        /```([\s\S]*?)```/g,
+        '<pre><code>$1</code></pre>'
+    );
 
     /*
      * Código inline
      */
 
-    formattedText =
-        formattedText.replace(
-            /`([^`]+)`/g,
-            "<code>$1</code>"
-        );
+    formattedText = formattedText.replace(
+        /`([^`\n]+)`/g,
+        "<code>$1</code>"
+    );
 
+    /*
+     * Negrito
+     */
+
+    formattedText = formattedText.replace(
+        /\*\*(.*?)\*\*/g,
+        "<strong>$1</strong>"
+    );
 
     /*
      * Títulos Markdown
      */
 
-    formattedText =
-        formattedText.replace(
-            /^### (.*?)$/gm,
-            "<h4>$1</h4>"
-        );
+    formattedText = formattedText.replace(
+        /^### (.*?)$/gm,
+        "<h4>$1</h4>"
+    );
 
-    formattedText =
-        formattedText.replace(
-            /^## (.*?)$/gm,
-            "<h3>$1</h3>"
-        );
+    formattedText = formattedText.replace(
+        /^## (.*?)$/gm,
+        "<h3>$1</h3>"
+    );
 
-    formattedText =
-        formattedText.replace(
-            /^# (.*?)$/gm,
-            "<h2>$1</h2>"
-        );
-
+    formattedText = formattedText.replace(
+        /^# (.*?)$/gm,
+        "<h2>$1</h2>"
+    );
 
     /*
      * Listas com hífen
      */
 
-    formattedText =
-        formattedText.replace(
-            /^- (.*?)$/gm,
-            "• $1"
-        );
-
+    formattedText = formattedText.replace(
+        /^- (.*?)$/gm,
+        "• $1"
+    );
 
     /*
      * Quebras de linha
      */
 
-    formattedText =
-        formattedText.replace(
-            /\n/g,
-            "<br>"
-        );
-
+    formattedText = formattedText.replace(
+        /\n/g,
+        "<br>"
+    );
 
     return formattedText;
 }
@@ -156,14 +169,14 @@ function formatMessage(text) {
    ========================================================= */
 
 function addMessage(text, type) {
+    if (!messagesContainer) {
+        return;
+    }
 
     const message =
         document.createElement("div");
 
-    message.classList.add(
-        "message"
-    );
-
+    message.classList.add("message");
 
     const messageContent =
         document.createElement("div");
@@ -172,7 +185,6 @@ function addMessage(text, type) {
         "message-content"
     );
 
-
     const messageName =
         document.createElement("span");
 
@@ -180,13 +192,15 @@ function addMessage(text, type) {
         "message-name"
     );
 
-
     const messageText =
         document.createElement("p");
 
 
-    if (type === "user") {
+    /* ---------------------------------------------------------
+       MENSAGEM DO USUÁRIO
+       --------------------------------------------------------- */
 
+    if (type === "user") {
         message.classList.add(
             "user-message"
         );
@@ -195,8 +209,7 @@ function addMessage(text, type) {
             "Você";
 
         messageText.textContent =
-            text;
-
+            String(text);
 
         messageContent.appendChild(
             messageName
@@ -209,13 +222,17 @@ function addMessage(text, type) {
         message.appendChild(
             messageContent
         );
+    }
 
-    } else {
 
+    /* ---------------------------------------------------------
+       MENSAGEM DO ASSISTENTE
+       --------------------------------------------------------- */
+
+    else {
         message.classList.add(
             "assistant-message"
         );
-
 
         const avatar =
             document.createElement("div");
@@ -232,14 +249,11 @@ function addMessage(text, type) {
         avatar.textContent =
             "🤖";
 
-
         messageName.textContent =
             "Assistente";
 
-
         messageText.innerHTML =
             formatMessage(text);
-
 
         messageContent.appendChild(
             messageName
@@ -248,7 +262,6 @@ function addMessage(text, type) {
         messageContent.appendChild(
             messageText
         );
-
 
         message.appendChild(
             avatar
@@ -260,10 +273,13 @@ function addMessage(text, type) {
     }
 
 
+    /* ---------------------------------------------------------
+       ADICIONA AO CHAT
+       --------------------------------------------------------- */
+
     messagesContainer.appendChild(
         message
     );
-
 
     messagesContainer.scrollTop =
         messagesContainer.scrollHeight;
@@ -275,10 +291,12 @@ function addMessage(text, type) {
    ========================================================= */
 
 function showLoading() {
+    if (!messagesContainer) {
+        return null;
+    }
 
     const loadingMessage =
         document.createElement("div");
-
 
     loadingMessage.classList.add(
         "message",
@@ -286,12 +304,10 @@ function showLoading() {
         "loading-message"
     );
 
-
     loadingMessage.setAttribute(
         "aria-label",
         "Assistente está processando a resposta"
     );
-
 
     loadingMessage.innerHTML = `
         <div
@@ -302,7 +318,6 @@ function showLoading() {
         </div>
 
         <div class="message-content">
-
             <span class="message-name">
                 Assistente
             </span>
@@ -315,37 +330,36 @@ function showLoading() {
                 <span></span>
                 <span></span>
             </p>
-
         </div>
     `;
-
 
     messagesContainer.appendChild(
         loadingMessage
     );
 
-
     messagesContainer.scrollTop =
         messagesContainer.scrollHeight;
-
 
     return loadingMessage;
 }
 
 
 /* =========================================================
-   CONTROLE DO BOTÃO
+   CONTROLE DO ESTADO DE ENVIO
    ========================================================= */
 
 function setSendingState(sending) {
-
     isSending = sending;
 
-    sendButton.disabled =
-        sending;
+    if (sendButton) {
+        sendButton.disabled =
+            sending;
+    }
 
-    input.disabled =
-        sending;
+    if (input) {
+        input.disabled =
+            sending;
+    }
 
     suggestionButtons.forEach(
         (button) => {
@@ -353,6 +367,11 @@ function setSendingState(sending) {
                 sending;
         }
     );
+
+    if (clearButton) {
+        clearButton.disabled =
+            sending;
+    }
 }
 
 
@@ -361,27 +380,39 @@ function setSendingState(sending) {
    ========================================================= */
 
 function addToHistory(role, content) {
+    if (
+        role !== "user" &&
+        role !== "assistant"
+    ) {
+        return;
+    }
+
+    if (
+        typeof content !== "string" ||
+        !content.trim()
+    ) {
+        return;
+    }
 
     conversationHistory.push({
         role,
         content
     });
 
-
     /*
      * Mantém somente as últimas mensagens.
-     * Evita que a requisição cresça indefinidamente.
+     *
+     * Isso evita que o histórico cresça indefinidamente.
      */
 
     if (
         conversationHistory.length >
         MAX_HISTORY_MESSAGES
     ) {
-
         conversationHistory.splice(
             0,
             conversationHistory.length -
-            MAX_HISTORY_MESSAGES
+                MAX_HISTORY_MESSAGES
         );
     }
 }
@@ -392,143 +423,88 @@ function addToHistory(role, content) {
    ========================================================= */
 
 function clearConversation() {
-
     if (isSending) {
         return;
     }
-
 
     const confirmed =
         window.confirm(
             "Deseja limpar a conversa atual?"
         );
 
-
     if (!confirmed) {
         return;
     }
 
+    /*
+     * Limpa completamente o histórico enviado
+     * para a IA.
+     */
 
     conversationHistory.length = 0;
 
-
     /*
-     * Remove todas as mensagens criadas
-     * depois da mensagem inicial.
+     * Localiza todas as mensagens.
+     *
+     * A primeira mensagem é a mensagem inicial
+     * do assistente.
+     *
+     * Todas as seguintes são mensagens criadas
+     * durante a conversa.
      */
 
-    const dynamicMessages =
-        messagesContainer.querySelectorAll(
-            ".message:not(.assistant-message:first-child)"
+    if (messagesContainer) {
+        const messages =
+            messagesContainer.querySelectorAll(
+                ".message"
+            );
+
+        messages.forEach(
+            (message, index) => {
+                if (index > 0) {
+                    message.remove();
+                }
+            }
         );
+    }
 
+    /*
+     * Limpa o campo de entrada.
+     */
 
-    dynamicMessages.forEach(
-        (message) => {
-            message.remove();
+    if (input) {
+        input.value = "";
+        input.disabled = false;
+        input.focus();
+    }
+
+    /*
+     * Garante que o botão de envio volte
+     * ao estado normal.
+     */
+
+    if (sendButton) {
+        sendButton.disabled = false;
+    }
+
+    /*
+     * Garante que os botões de sugestão
+     * também voltem ao estado normal.
+     */
+
+    suggestionButtons.forEach(
+        (button) => {
+            button.disabled = false;
         }
     );
 
-
     /*
-     * Garante que a mensagem inicial
-     * continue existindo.
+     * O botão de limpar também volta ao estado normal.
      */
 
-    const firstMessage =
-        messagesContainer.querySelector(
-            ".message.assistant-message"
-        );
-
-
-    if (!firstMessage) {
-
-        const welcomeMessage =
-            document.createElement("div");
-
-        welcomeMessage.className =
-            "message assistant-message";
-
-        welcomeMessage.innerHTML = `
-            <div
-                class="message-avatar"
-                aria-hidden="true"
-            >
-                🤖
-            </div>
-
-            <div class="message-content">
-
-                <span class="message-name">
-                    Assistente
-                </span>
-
-                <p>
-                    Olá! 👋
-                    <br><br>
-                    Sou seu assistente de estudos.
-                    Pode me perguntar sobre qualquer
-                    assunto que esteja estudando.
-                </p>
-
-            </div>
-        `;
-
-        messagesContainer.prepend(
-            welcomeMessage
-        );
+    if (clearButton) {
+        clearButton.disabled = false;
     }
-
-
-    /*
-     * Recoloca as sugestões.
-     */
-
-    const existingSuggestions =
-        messagesContainer.querySelector(
-            ".suggestions"
-        );
-
-
-    if (!existingSuggestions) {
-
-        const suggestions =
-            document.createElement("div");
-
-        suggestions.className =
-            "suggestions";
-
-        suggestions.innerHTML = `
-            <button type="button">
-                🧠 Explique um assunto
-            </button>
-
-            <button type="button">
-                📝 Crie exercícios
-            </button>
-
-            <button type="button">
-                📖 Faça um resumo
-            </button>
-
-            <button type="button">
-                💡 Tire uma dúvida
-            </button>
-        `;
-
-        messagesContainer.appendChild(
-            suggestions
-        );
-    }
-
-
-    input.value = "";
-
-    input.disabled = false;
-
-    sendButton.disabled = false;
-
-    input.focus();
 }
 
 
@@ -537,15 +513,21 @@ function clearConversation() {
    ========================================================= */
 
 async function sendMessage() {
-
     if (isSending) {
         return;
     }
 
+    if (!input) {
+        return;
+    }
 
     const text =
         input.value.trim();
 
+
+    /* ---------------------------------------------------------
+       VALIDAÇÃO DE MENSAGEM VAZIA
+       --------------------------------------------------------- */
 
     if (!text) {
         input.focus();
@@ -553,44 +535,67 @@ async function sendMessage() {
     }
 
 
+    /* ---------------------------------------------------------
+       VALIDAÇÃO DO TAMANHO
+       --------------------------------------------------------- */
+
     if (
         text.length >
         MAX_MESSAGE_LENGTH
     ) {
-
         addMessage(
             "Sua mensagem é muito longa. Tente enviar uma mensagem com até 4.000 caracteres.",
             "assistant"
         );
 
+        input.focus();
+
         return;
     }
 
 
-    /*
-     * Mostra a mensagem do usuário.
-     */
+    /* ---------------------------------------------------------
+       MOSTRA A MENSAGEM DO USUÁRIO
+       --------------------------------------------------------- */
 
     addMessage(
         text,
         "user"
     );
 
-
     input.value = "";
 
     setSendingState(true);
 
 
-    /*
-     * Mostra o carregamento.
-     */
+    /* ---------------------------------------------------------
+       MOSTRA CARREGAMENTO
+       --------------------------------------------------------- */
 
     const loadingMessage =
         showLoading();
 
 
+    /* ---------------------------------------------------------
+       CONTROLE DE TEMPO DA REQUISIÇÃO
+       --------------------------------------------------------- */
+
+    const controller =
+        new AbortController();
+
+    const timeoutId =
+        setTimeout(
+            () => {
+                controller.abort();
+            },
+            REQUEST_TIMEOUT
+        );
+
+
     try {
+        /* -----------------------------------------------------
+           REQUISIÇÃO PARA O BACKEND
+           ----------------------------------------------------- */
 
         const response =
             await fetch(
@@ -608,110 +613,71 @@ async function sendMessage() {
 
                         messages:
                             conversationHistory
-                    })
+                    }),
+
+                    signal:
+                        controller.signal
                 }
             );
 
 
-        /*
-         * Tenta interpretar a resposta
-         * como JSON.
-         */
+        /* -----------------------------------------------------
+           CANCELA O TIMER
+           ----------------------------------------------------- */
+
+        clearTimeout(
+            timeoutId
+        );
+
+
+        /* -----------------------------------------------------
+           TENTA LER O JSON
+           ----------------------------------------------------- */
 
         let data;
 
         try {
-
             data =
                 await response.json();
-
         } catch (jsonError) {
-
             throw new Error(
                 "O servidor retornou uma resposta inválida."
             );
         }
 
 
-        /*
-         * Verifica erros HTTP.
-         */
+        /* -----------------------------------------------------
+           VERIFICA STATUS HTTP
+           ----------------------------------------------------- */
 
         if (!response.ok) {
-
             throw new Error(
-                data.error ||
-                "Erro ao processar a mensagem."
+                data &&
+                typeof data.error === "string"
+                    ? data.error
+                    : "Erro ao processar a mensagem."
             );
         }
 
 
-        /*
-         * Verifica se a API retornou
-         * uma resposta válida.
-         */
+        /* -----------------------------------------------------
+           VERIFICA RESPOSTA DA IA
+           ----------------------------------------------------- */
 
         if (
             !data ||
             typeof data.response !== "string" ||
             !data.response.trim()
         ) {
-
             throw new Error(
                 "O servidor não retornou uma resposta válida."
             );
         }
 
 
-        /*
-         * Remove o carregamento.
-         */
-
-        loadingMessage.remove();
-
-
-        /*
-         * Salva a pergunta.
-         */
-
-        addToHistory(
-            "user",
-            text
-        );
-
-
-        /*
-         * Mostra a resposta.
-         */
-
-        addMessage(
-            data.response,
-            "assistant"
-        );
-
-
-        /*
-         * Salva a resposta da IA.
-         */
-
-        addToHistory(
-            "assistant",
-            data.response
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Erro ao enviar mensagem:",
-            error
-        );
-
-
-        /*
-         * Remove o carregamento
-         * se ele ainda estiver na página.
-         */
+        /* -----------------------------------------------------
+           REMOVE CARREGAMENTO
+           ----------------------------------------------------- */
 
         if (
             loadingMessage &&
@@ -721,44 +687,131 @@ async function sendMessage() {
         }
 
 
+        /* -----------------------------------------------------
+           SALVA PERGUNTA NO HISTÓRICO
+           ----------------------------------------------------- */
+
+        addToHistory(
+            "user",
+            text
+        );
+
+
+        /* -----------------------------------------------------
+           MOSTRA RESPOSTA
+           ----------------------------------------------------- */
+
         addMessage(
-            "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente em alguns segundos.",
+            data.response,
             "assistant"
         );
 
 
+        /* -----------------------------------------------------
+           SALVA RESPOSTA NO HISTÓRICO
+           ----------------------------------------------------- */
+
+        addToHistory(
+            "assistant",
+            data.response
+        );
+
+    } catch (error) {
+        /* -----------------------------------------------------
+           CANCELA TIMER CASO A REQUISIÇÃO TERMINE POR ERRO
+           ----------------------------------------------------- */
+
+        clearTimeout(
+            timeoutId
+        );
+
+
+        /* -----------------------------------------------------
+           REMOVE CARREGAMENTO
+           ----------------------------------------------------- */
+
+        if (
+            loadingMessage &&
+            loadingMessage.isConnected
+        ) {
+            loadingMessage.remove();
+        }
+
+
+        /* -----------------------------------------------------
+           IDENTIFICA TIPO DE ERRO
+           ----------------------------------------------------- */
+
+        let errorMessage =
+            "Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente em alguns segundos.";
+
+        if (
+            error &&
+            error.name === "AbortError"
+        ) {
+            errorMessage =
+                "A resposta demorou mais do que o esperado. O servidor pode estar iniciando. Tente novamente em alguns segundos.";
+        }
+
+        console.error(
+            "Erro ao enviar mensagem:",
+            error
+        );
+
+
+        /* -----------------------------------------------------
+           MOSTRA ERRO AO USUÁRIO
+           ----------------------------------------------------- */
+
+        addMessage(
+            errorMessage,
+            "assistant"
+        );
+
     } finally {
+        /* -----------------------------------------------------
+           RESTAURA INTERFACE
+           ----------------------------------------------------- */
+
+        clearTimeout(
+            timeoutId
+        );
 
         setSendingState(false);
 
-        input.focus();
+        if (input) {
+            input.focus();
+        }
     }
 }
 
 
 /* =========================================================
-   FORMULÁRIO
+   FORMULÁRIO DO CHAT
    ========================================================= */
 
-chatForm.addEventListener(
-    "submit",
-    function (event) {
+if (chatForm) {
+    chatForm.addEventListener(
+        "submit",
+        function (event) {
+            event.preventDefault();
 
-        event.preventDefault();
-
-        sendMessage();
-    }
-);
+            sendMessage();
+        }
+    );
+}
 
 
 /* =========================================================
-   LIMPAR CONVERSA
+   BOTÃO DE LIMPAR CONVERSA
    ========================================================= */
 
-clearButton.addEventListener(
-    "click",
-    clearConversation
-);
+if (clearButton) {
+    clearButton.addEventListener(
+        "click",
+        clearConversation
+    );
+}
 
 
 /* =========================================================
@@ -766,31 +819,24 @@ clearButton.addEventListener(
    ========================================================= */
 
 function setupSuggestionButtons() {
-
     const buttons =
         document.querySelectorAll(
             ".suggestions button"
         );
 
-
     buttons.forEach(
         (button) => {
-
             button.addEventListener(
                 "click",
                 function () {
-
                     if (isSending) {
                         return;
                     }
 
-
                     const text =
                         button.textContent.trim();
 
-
                     const prompts = {
-
                         "🧠 Explique um assunto":
                             "Explique um assunto de forma simples e fácil de entender. Primeiro pergunte qual assunto eu quero estudar.",
 
@@ -804,12 +850,12 @@ function setupSuggestionButtons() {
                             "Tenho uma dúvida sobre um assunto. Ajude-me a entender o conteúdo de forma simples."
                     };
 
+                    if (input) {
+                        input.value =
+                            prompts[text] || "";
 
-                    input.value =
-                        prompts[text] || "";
-
-
-                    input.focus();
+                        input.focus();
+                    }
                 }
             );
         }
@@ -823,4 +869,6 @@ function setupSuggestionButtons() {
 
 setupSuggestionButtons();
 
-input.focus();
+if (input) {
+    input.focus();
+}
